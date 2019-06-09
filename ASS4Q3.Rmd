@@ -1,0 +1,239 @@
+---
+title: "Control Charts A4_ Q3- Thiwanka Jayasiri"
+output: html_notebook
+---
+
+
+
+1 - Load the required libraries.
+
+2 - Aggregate the data by the year-month-date( for this we require library - Lubridate).
+
+3 - Can use library skimr for the quick statsitical overview and to get an idea of the missing values.
+
+4 - Once we trim the  Time stamp as to  YYYY-MM-DD format we can use it group by and then plot the required control charts - 'xbar', 's' and 'run'.
+
+5 - A quick overview of the chart types are as follows:
+
+  Xbar and S charts for average measurements : If there is more than one measurement in each subgroup the Xbar and S charts will display the average and                                                      the within subgroup standard deviation respectively.
+  
+  Run charts: run charts (using appropriate rules) are more sensitive to moderate, persistent shifts in data (< 2 SD) than control charts
+
+
+
+```{r}
+library(qicharts2)
+library(caret)
+library(skimr)
+
+library(readr)
+library(dplyr)
+library(lubridate)
+```
+
+
+```{r}
+newdf <- read.csv('C:\\Users\\DELL\\Desktop\\Desktop Work\\Data423\\ASS4\\monitor.csv')
+
+# newdf %>% 
+#   mutate(hour_of_day = as.date(as.POSIXct(datetime(newdf, "%m/%d/%Y %H:%M:%S")))) %>% 
+#   group_by(hour_of_day)
+
+head(newdf)
+str(newdf)
+
+```
+
+
+
+Its requires to be aggregated using date , hence we need to extract the date only from Timesteamp coloum and crate a new data frame to proceeed with the rest
+
+
+```{r}
+
+mydate <- as.Date(newdf$Timestam)
+head(mydate)
+
+```
+
+
+```{r}
+Process_Memory <- newdf$ProcessMemory
+Prediction <- newdf$Prediction
+prediction_timems <- newdf$PredictionTimeMS
+
+data <- data.frame(mydate,Process_Memory,Prediction,prediction_timems)
+head(data)
+summary(data)
+str(data)
+```
+
+```{r}
+aggregate(prediction_timems~ mydate, data =df , mean)
+```
+
+
+#ProcessMemory - the allocated memory (MB) of the relevant server process
+
+Is the memory usage of the server in control? "NO" , It's out of control and by observing the 'X-bar' we can notice that the chart lines goes beyond the upper control limits. 
+
+ProcessMemory - the allocated memory (MB) of the relevant server process
+
+#Process Memory - Xbar Chart
+
+```{r}
+
+qicharts2::qic(x = mydate, y = Process_Memory, data = data, chart = "xbar", subtitle = "Process Memomry" , xlab = "Month" , ylab = "Allocated server process(MB)")
+
+
+summary(qicharts2::qic(x = mydate, y = Process_Memory, data = data, chart = "xbar", subtitle = "Process Memomry" , xlab = "Month" , ylab = "Allocated server process(MB)"))
+
+qicharts2::qic(x = mydate, y = Process_Memory, data = data, chart = "xbar", subtitle = "Process Memomry" ,freeze = 20, xlab = "Month" , ylab = "Allocated server process(MB)")
+
+summary(qicharts2::qic(x = mydate, y = Process_Memory, data = data, chart = "xbar", subtitle = "Process Memomry" ,freeze = 20, xlab = "Month" , ylab = "Allocated server process(MB)"))
+
+
+```
+
+#Process Memory - S chart 
+
+
+```{r}
+qicharts2::qic(x = mydate, y = Process_Memory, data = data, chart = "s", subtitle = "Process Memomry", xlab = "Month" , ylab = "Allocated server process(MB)")
+
+summary(qicharts2::qic(x = mydate, y = Process_Memory, data = data, chart = "s", subtitle = "Process Memomry", xlab = "Month" , ylab = "Allocated server process(MB)"))
+
+
+qicharts2::qic(x = mydate, y = Process_Memory, data = data, chart = "s", subtitle = "Process Memomry", xlab = "Month" , freeze =20 , ylab = "Allocated server process(MB)")
+
+summary(qicharts2::qic(x = mydate, y = Process_Memory, data = data, chart = "s", subtitle = "Process Memomry", xlab = "Month" , freeze =20 , ylab = "Allocated server process(MB)"))
+
+
+```
+
+
+
+#Process Memory  Run chart
+
+
+```{r}
+
+qicharts2::qic(x = mydate, y = Process_Memory, data = data, chart = "run", subtitle = "Process Memory",xlab = "Month", ylab = "Allocated server process(MB)")
+summary(qicharts2::qic(x = mydate, y = Process_Memory, data = data, chart = "run", subtitle = "Process Memory",xlab = "Month", ylab = "Allocated server process(MB)"))
+
+qicharts2::qic(x = mydate, y = Process_Memory, data = data, chart = "run", subtitle = "Process Memory",xlab = "Month", freeze = 20 , ylab = "Allocated server process(MB)")
+
+summary(qicharts2::qic(x = mydate, y = Process_Memory, data = data, chart = "run", subtitle = "Process Memory",xlab = "Month", freeze =20 ,ylab = "Allocated server process(MB)"))
+
+
+```
+
+
+#Prediction - the value predicted by the model
+
+Is the prediction time of the model in control? "No" it's out of control as we could observe the red dott out of the lower and upper control limits.
+
+
+
+#Prediction Xbar Chart
+
+
+```{r}
+qicharts2::qic(x = mydate, y = Prediction, data = data, chart = "xbar", subtitle = "Prediction", xlab = "Month" , ylab = "Prediction by Model (MB)")
+
+summary(qicharts2::qic(x = mydate, y = Prediction, data = data, chart = "xbar", subtitle = "Prediction", xlab = "Month" , ylab = "Prediction by Model (MB)"))
+
+
+qicharts2::qic(x = mydate, y = Prediction, data = data, chart = "xbar", subtitle = "Prediction", xlab = "Month" , freeze = 20 , ylab = "Prediction by Model (MB)")
+
+summary(qicharts2::qic(x = mydate, y = Prediction, data = data, chart = "xbar", subtitle = "Prediction", xlab = "Month" , freeze = 20 , ylab = "Prediction by Model (MB)"))
+
+```
+
+
+
+#Prediction S Chart
+
+
+```{r}
+qicharts2::qic(x = mydate, y = Prediction, data = data, chart = "s", subtitle = "Prediction", xlab = "Month" , ylab = "Prediction by Model (MB)")
+
+summary(qicharts2::qic(x = mydate, y = Prediction, data = data, chart = "s", subtitle = "Prediction", xlab = "Month" , ylab = "Prediction by Model (MB)"))
+qicharts2::qic(x = mydate, y = Prediction, data = data, chart = "s", subtitle = "Prediction", xlab = "Month", freeze = 20 , ylab = "Prediction by Model (MB)")
+
+summary(qicharts2::qic(x = mydate, y = Prediction, data = data, chart = "s", subtitle = "Prediction", xlab = "Month", freeze = 20 , ylab = "Prediction by Model (MB)"))
+
+```
+
+
+#Prediction Run Chart
+
+
+```{r}
+
+qicharts2::qic(x = mydate, y = Prediction, data = data, chart = "run",  subtitle = "Prediction", xlab = "Month" , ylab = "Prediction by Model (MB)")
+
+summary(qicharts2::qic(x = mydate, y = Prediction, data = data, chart = "run",  subtitle = "Prediction", xlab = "Month" , ylab = "Prediction by Model (MB)"))
+
+qicharts2::qic(x = mydate, y = Prediction, data = data, chart = "run", freeze = 20, subtitle = "Prediction- Freeze Limit 20", xlab = "Month" , ylab = "Prediction by Model (MB)")
+
+summary(qicharts2::qic(x = mydate, y = Prediction, data = data, chart = "run", freeze = 20, subtitle = "Prediction", xlab = "Month" , ylab = "Prediction by Model (MB)"))
+
+```
+
+
+
+#PredictionTimeMS - the duration of the prediction task in milliseconds
+
+ Is the prediction time of the model in control? No it's out of control ones the freezed parameter been applied, we get 4-5 outofcontrol values.Hence its Not in control.
+
+
+
+#Prediction Time MS  X bar chart
+
+
+```{r}
+qicharts2::qic(x = mydate, y = prediction_timems, data = data, chart = "xbar",subtitle = "Prediction Time", xlab ="Month", ylab = "Prediction task in milliseconds" )
+
+summary(qicharts2::qic(x = mydate, y = prediction_timems, data = data, chart = "xbar", subtitle = "Prediction Time", xlab ="Month", ylab = "Prediction task in milliseconds" ))
+
+
+qicharts2::qic(x = mydate, y = prediction_timems, data = data, chart = "xbar",freeze = 20 ,subtitle = "Prediction Time", xlab ="Month", ylab = "Prediction task in milliseconds" )
+
+summary(qicharts2::qic(x = mydate, y = prediction_timems, data = data, chart = "xbar", freeze = 20, subtitle = "Prediction Time", xlab ="Month", ylab = "Prediction task in milliseconds" ))
+
+```
+
+
+#Prediction Time MS  S bar chart
+
+```{r}
+
+
+qicharts2::qic(x = mydate, y = prediction_timems, data = data, chart = "s", subtitle = "Prediction Time", xlab ="Month", ylab = "Prediction task in milliseconds")
+summary(qicharts2::qic(x = mydate, y = prediction_timems, data = data, chart = "s", subtitle = "Prediction Time", xlab ="Month", ylab = "Prediction task in milliseconds"))
+
+qicharts2::qic(x = mydate, y = prediction_timems, data = data, chart = "s",freeze = 20,subtitle = "Prediction Time", xlab ="Month", ylab = "Prediction task in milliseconds")
+
+
+summary(qicharts2::qic(x = mydate, y = prediction_timems, data = data, chart = "s", subtitle = "Prediction Time", xlab ="Month", freeze = 20 , ylab = "Prediction task in milliseconds"))
+
+```
+
+
+
+#Prediction Time MS  Run chart
+
+```{r}
+
+qicharts2::qic(x = mydate, y = prediction_timems, data = data, chart = "run", subtitle = "Prediction Time", xlab ="Month" , ylab = "Prediction task in milliseconds")
+
+summary(qicharts2::qic(x = mydate, y = prediction_timems, data = data, chart = "run", subtitle = "Prediction Time", xlab ="Month", ylab = "Prediction task in milliseconds"))
+
+qicharts2::qic(x = mydate, y = prediction_timems, data = data, chart = "run", subtitle = "Prediction Time", xlab ="Month" , freeze = 20 , ylab = "Prediction task in milliseconds")
+
+summary(qicharts2::qic(x = mydate, y = prediction_timems, data = data, chart = "run", subtitle = "Prediction Time", xlab ="Month",freeze = 20, ylab = "Prediction task in milliseconds"))
+```
+
+
+
